@@ -46,11 +46,9 @@ classdef Aircraft < handle
             %ADDTUBE Adds a new tube to the components table
             L = X(1);
             x = X(2);
-            % V = t * L * pi * D;
-            V = t * L * pi * (D - t);
+            V = t * L * pi * D;
             m = Material.getMass(material, V);
-            %I = (D^2/8 + L^2/12) * m;
-            I = 1/12 * m * (3 * (D^2/2 - D * t + t^2) + L^2);
+            I = (D^2/8 + L^2/12) * m;
             details = sprintf("tube (L=%.3f, D=%.3f)m T=%.3fm", L, D, t);
             obj.addComponent(name, material, m, x, I, details);
         end
@@ -96,7 +94,8 @@ classdef Aircraft < handle
             m = sum(selectedComponents.m);
             x = sum(selectedComponents.m .* selectedComponents.x) / m;
             I = sum(selectedComponents.I) + sum(selectedComponents.m .* (selectedComponents.x .^ 2));
-            o = [m, x, I];
+            Icg = I - m * x ^ 2;
+            o = [m, x, I, Icg];
             fprintf("%-22s %.3fkg, %+.3fm, %.3fkgm^2\n", category, m, x, I);
         end
 
@@ -109,6 +108,7 @@ classdef Aircraft < handle
             m = sum(selectedComponents.m);
             x = sum(selectedComponents.m .* selectedComponents.x) / m;
             I = sum(selectedComponents.I) + sum(selectedComponents.m .* (selectedComponents.x .^ 2));
+            Icg = I - m * x ^ 2;
             fprintf("  = TOTAL              %.3fkg, %+.3fm, %.3fkgm^2\n", m, x, I);
         end
     end
